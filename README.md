@@ -18,3 +18,7 @@ Notes:
 - No build step required. Phaser is loaded from CDN.
 - If you prefer npm, you can scaffold with `npm init` and install `phaser` as a dependency.
 
+Members:
+- Jimy Shi
+
+
