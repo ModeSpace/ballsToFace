@@ -3,8 +3,8 @@
 Minimal Phaser 3 demo that displays text and responds to clicks/taps.
 
 Files added:
-- `index.html` — small HTML wrapper that loads Phaser from CDN and `src/main.js`.
-- `src/main.js` — minimal Phaser scene that shows text and toggles color on pointer down.
+- `index.html` — small HTML wrapper that loads Phaser from CDN and `src/gameScene.js`.
+- `src/gameScene.js` — minimal Phaser scene that shows text and toggles color on pointer down.
 
 Run locally (from project root):
 

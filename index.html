@@ -1,16 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Winter25-Hackathon - Phaser demo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>body{margin:0;background:#2d2d2d;color:#fff;font-family:Arial, Helvetica, sans-serif;}</style>
+    <meta charset="utf-8" />
+    <title>Snowball Game</title>
+    <style>
+        body { margin: 0; }
+        #game-container { width: 800px; height: 600px; margin: 0 auto; }
+        /* hide the webcam element but keep it playing */
+        #webcam { display: none; }
+    </style>
 </head>
 <body>
-  <div id="game-container"></div>
-  <!-- Phaser 3 from CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script src="src/main.js"></script>
+<div id="game-container"></div>
+<video id="webcam" autoplay playsinline muted></video>
+
+<!-- Phaser (global) -->
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+<!-- app entry (ES module) -->
+<script type="module" src="src/main.js"></script>
 </body>
 </html>
-
