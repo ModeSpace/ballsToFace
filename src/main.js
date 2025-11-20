@@ -1,4 +1,5 @@
-import GameScene from './gameScene.js';
+import GameScene from './Scene/gameScene.js';
+import TitleScene from "./Scene/titleScene.js";
 
 const config = {
     type: Phaser.AUTO,
@@ -9,7 +10,7 @@ const config = {
     physics: {
         default: 'arcade'
     },
-    scene: [ GameScene ]
+    scene: [ TitleScene, GameScene ]
 };
 
 new Phaser.Game(config);
