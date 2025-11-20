@@ -7,15 +7,45 @@ export default class GameScene extends Phaser.Scene {
         super({ key: 'GameScene' });
     }
 
+    preload() {
+        // Load individual tile images from Assests/first-character as separate frames.
+        // Files are named tile000.png .. tile015.png in the repo.
+        for (let i = 0; i <= 15; i++) {
+            const idx = String(i).padStart(3, '0');
+            this.load.image(`player${i}`, `Assests/first-character/tile${idx}.png`);
+        }
+    }
+
     create() {
         const W = this.cameras.main.width;
         const H = this.cameras.main.height;
         const SIZE = 50;
 
+        // animations for player (assumption: tiles are arranged as 4 frames per direction)
+        // mapping assumption (common layout):
+        // 0-3   : walk down
+        // 4-7   : walk left
+        // 8-11  : walk right
+        // 12-15 : walk up
+        const makeFrames = (start, end) => {
+            const out = [];
+            for (let i = start; i <= end; i++) out.push({ key: `player${i}` });
+            return out;
+        };
+        this.anims.create({ key: 'walk-down', frames: makeFrames(0, 3), frameRate: 8, repeat: -1 });
+        this.anims.create({ key: 'walk-left', frames: makeFrames(12, 15), frameRate: 8, repeat: -1 });
+        this.anims.create({ key: 'walk-right', frames: makeFrames(4, 7), frameRate: 8, repeat: -1 });
+        this.anims.create({ key: 'walk-up', frames: makeFrames(8, 11), frameRate: 8, repeat: -1 });
+
         // player square
         const startX = W / 2 - SIZE / 2;
         const startY = H / 2 - SIZE / 2;
-        this.player = this.add.rectangle(startX, startY, SIZE, SIZE, 0xffffff).setOrigin(0);
+        // Create the player using the first frame as the initial texture.
+        this.player = this.add.sprite(startX, startY, 'player0');
+        // Use top-left origin so positioning and body sizes align with earlier code that used x/y offsets.
+        this.player.setOrigin(0, 0);
+        // track last facing direction for idle frame
+        this.lastDir = 'down';
         this.physics.add.existing(this.player);
         this.player.body.setCollideWorldBounds(true);
         this.player.body.setSize(SIZE, SIZE);
@@ -85,14 +115,38 @@ export default class GameScene extends Phaser.Scene {
     update() {
         const playerSpeed = 200;
         this.player.body.setVelocity(0);
-        if (this.cursors.left.isDown)  this.player.body.setVelocityX(-playerSpeed);
-        if (this.cursors.right.isDown) this.player.body.setVelocityX(playerSpeed);
-        if (this.cursors.up.isDown)    this.player.body.setVelocityY(-playerSpeed);
-        if (this.cursors.down.isDown)  this.player.body.setVelocityY(playerSpeed);
-        if (this.wasd.A.isDown)        this.player.body.setVelocityX(-playerSpeed);
-        if (this.wasd.D.isDown)        this.player.body.setVelocityX(playerSpeed);
-        if (this.wasd.W.isDown)        this.player.body.setVelocityY(-playerSpeed);
-        if (this.wasd.S.isDown)        this.player.body.setVelocityY(playerSpeed);
+        // movement input
+        if (this.cursors.left.isDown)        this.player.body.setVelocityX(-playerSpeed);
+        if (this.cursors.right.isDown)       this.player.body.setVelocityX(playerSpeed);
+        if (this.cursors.up.isDown)          this.player.body.setVelocityY(-playerSpeed);
+        if (this.cursors.down.isDown)        this.player.body.setVelocityY(playerSpeed);
+        if (this.wasd.A.isDown)              this.player.body.setVelocityX(-playerSpeed);
+        if (this.wasd.D.isDown)              this.player.body.setVelocityX(playerSpeed);
+        if (this.wasd.W.isDown)              this.player.body.setVelocityY(-playerSpeed);
+        if (this.wasd.S.isDown)              this.player.body.setVelocityY(playerSpeed);
+
+        // choose animation based on velocity (horizontal priority for diagonals)
+        const vx = this.player.body.velocity.x;
+        const vy = this.player.body.velocity.y;
+        if (vx < 0) {
+            if (this.player.anims.currentAnim?.key !== 'walk-left') this.player.anims.play('walk-left', true);
+            this.lastDir = 'left';
+        } else if (vx > 0) {
+            if (this.player.anims.currentAnim?.key !== 'walk-right') this.player.anims.play('walk-right', true);
+            this.lastDir = 'right';
+        } else if (vy < 0) {
+            if (this.player.anims.currentAnim?.key !== 'walk-up') this.player.anims.play('walk-up', true);
+            this.lastDir = 'up';
+        } else if (vy > 0) {
+            if (this.player.anims.currentAnim?.key !== 'walk-down') this.player.anims.play('walk-down', true);
+            this.lastDir = 'down';
+        } else {
+            // idle: stop anim and show first frame of last direction
+            if (this.player.anims.isPlaying) this.player.anims.stop();
+            const idleMap = { down: 'player0', left: 'player12', right: 'player4', up: 'player8' };
+            const tex = idleMap[this.lastDir] || 'player0';
+            if (this.player.texture.key !== tex) this.player.setTexture(tex);
+        }
 
         // call detector every N frames
         if (this.video && this.video.readyState >= 2) {
